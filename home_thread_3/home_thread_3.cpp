@@ -6,38 +6,47 @@
 
 using namespace std;
 
+void findMin(vector<int>& vec, int& i, int& Size, int& minIndex, promise<void> prom)
+{
 
-void selectionSort(vector<int>& array, promise<void> pr) {
-	int size = array.size();
-	int  min;
-	for (int i = 0; i < size - 1; i++) {
-		min = i; 
-		for (int j = i + 1; j < size; j++) {
-			
-			if (array[min] > array[j]) {
-			
-				min = j; 
-			}
+	for (int j = i + 1; j < Size; j++)
+	{
+		if (vec[minIndex]>vec[j])
+		{
+			minIndex = j;
 		}
-		int temp = array[i]; 
-		array[i] = array[min]; 
-		array[min] = temp; 
+	}
+	
+	prom.set_value();
+};
+
+
+int main() {
+
+	setlocale(LC_ALL, "rus");
+
+	vector<int>vec{ 2, 4, 56, 23, 12, 78,59,34,6,20,100 };
+
+	int Size = vec.size();
+	int minIndex{};
+	for (int i = 0; i < Size - 1; i++)
+	{
+		promise<void> prom;
+		future<void> future_res = prom.get_future();
+		minIndex = i;
+		auto Min = async(findMin, ref(vec), ref(i), ref(Size), ref(minIndex), move(prom));
+		future_res.get();
+		if (vec[i] > vec[minIndex])
+		{
+			swap(vec[i], vec[minIndex]);
+		}
+	}
+			
+	cout << "После сортировки: " << endl;;
+		for (auto i : vec) {
+			cout << i << endl;
 		
-	}
-	this_thread::sleep_for(1000ms);
-        pr.set_value();
-}
+		}
 
-
-int main(){
-	vector<int> arr1{2, 4, 56, 23, 12, 78,59,34};
-	promise<void> pr;
-	future<void> fut = pr.get_future();
-	auto t1 = async(selectionSort, ref(arr1), move(pr));
-	fut.wait();
-	for (auto i:arr1){
-
-		cout << i << endl;
-	}
 	return EXIT_SUCCESS;
 }
